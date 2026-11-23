@@ -27,6 +27,10 @@ def validate(word: str) -> str:
         raise ValueError("entry must be exactly one word (no white space inside)")
     if not (1 <= len(word) <= 30):
         raise ValueError("word must be 1 to 30 characters long")
+    if not word.isalpha():
+        # The judge brief allows one word and no punctuation tricks:
+        # letters only, no digits, hyphens, apostrophes or other marks.
+        raise ValueError("word must contain letters only (no punctuation)")
     word.encode("utf-8")  # must be valid UTF-8 text
     return word
 
@@ -37,6 +41,11 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "entry.txt"
     output_path.write_text(word, encoding="utf-8")
+    # Read back and verify: what the judge will read must be exactly the
+    # validated word, with no extra bytes (e.g. no trailing newline).
+    written = output_path.read_text(encoding="utf-8")
+    if written != word:
+        raise ValueError(f"verification failed: {output_path} holds {written!r}, expected {word!r}")
     print(f"Wrote {word!r} ({len(word)} chars) to {output_path}")
     return 0
 
